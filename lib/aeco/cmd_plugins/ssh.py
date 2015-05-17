@@ -3,13 +3,12 @@
 aeco ssh
 
 Usage:
-  aeco ssh [<argument>...]
+  aeco ssh [<argument>]...
   aeco ssh -h, --help
 
 Options:
   -h, --help            Show this screen and exit.
 """
-
 
 from docopt import docopt
 from aeco.utils.utils import input_choice
@@ -18,16 +17,21 @@ import sys
 import json
 import os
 import re
+import signal
+
+def signal_handler(signal, frame):
+        print('You pressed Ctrl+C!')
+        sys.exit(0)
 
 class Ssh(AecoBase):
     def __init__(self, options=None):
-        super(Ssh, self).__init__(options=options, docs=__doc__)
-
+        super(Ssh, self).__init__(options=options, docs=None)
 
     def _run_cmd(self, ip):
         cmd = "ssh %s %s" % (ip, " ".join(sys.argv[2:]))
         print "Running %s" % cmd
         os.system(cmd)
+
     def __get__(self):
         with open('/tmp/server.json') as data_file:
             servers = json.load(data_file)
@@ -36,7 +40,7 @@ class Ssh(AecoBase):
             server_names.append(server)
 
         ssh_hostname = input_choice("SSH Server", server_names, fmode=False)
-        ips =  servers.get(ssh_hostname)
+        ips = servers.get(ssh_hostname)
 
         if len(ips) == 1:
             self._run_cmd(ips[0])
@@ -54,5 +58,6 @@ class Ssh(AecoBase):
             exit(1)
 
     def parse(self):
+        signal.signal(signal.SIGINT, signal_handler)
         self.__get__()
 

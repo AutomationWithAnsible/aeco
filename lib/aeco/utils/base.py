@@ -4,7 +4,11 @@ class AecoBase(object):
     import os
 
     def __init__(self, options=None, docs=__doc__):
-        self.arguments = docopt(docs)  # Command line arguments
+        if docs:
+            self.arguments = docopt(docs)  # Command line arguments
+        else:
+            self.arguments = {}
+
         self.verbose = self.arguments.get("--verbose")  # Be more verbose
 
         self.results = []  # Store results for printing
