@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+
+import sys
+import os
+import pkgutil
+import aeco.cmd_plugins as cmd_plugins
+
+import ConfigParser
+__CONF__ = "/aeco.ini"
+
+
+class BaseParser():
+    def __init__(self, arguments):
+        self.name = "aeco"
+        self.arguments = arguments
+        self.cmd_obj = None
+        self.plugins = []
+        self.path_to_me = os.path.dirname(os.path.realpath(__file__))
+
+        for importer, modname, ispkg in pkgutil.iter_modules(cmd_plugins.__path__):
+            if modname[0].isalpha():
+                plugin_name = modname.replace("_plug", "")
+                self.plugins.append({"name": plugin_name, "pathname": modname})
+
+    def config_read(self, section):
+        config = ConfigParser.ConfigParser()
+        #config_file = self.path_to_me + __CONF__
+        config_file = "/Users/helal/" + __CONF__
+        try:
+            config.read(config_file)
+            return config.items(section)
+        except ConfigParser.NoSectionError as E:
+            return False
+
+    def parse(self):
+        if len(sys.argv) >= 2:
+            # Hack should do it in an easier way
+            elements = filter(lambda x: sys.argv[1] in x.values(), self.plugins)
+            result = [element['pathname'] for element in elements]
+            if result and len(result) > 0:
+                __import__("aeco.cmd_plugins.%s" % result[0])
+                cmd_obj = getattr(cmd_plugins, result[0])  # Get the right namespace
+                class_name = result[0].title()  # Use Camel for Class name
+                cmd_obj = getattr(cmd_obj, class_name)(options=self.config_read(sys.argv[1]))  # Send options
+                cmd_obj.parse()
+            else:
+                self.print_usage()
+        else:
+            self.print_usage()
+
+    def print_usage(self):
+        usage = """
+This is apphome-ecosystem tools. "{}" for short
+
+Usage:
+{}
+  {} -h, --help
+"""
+        base_usage = ""
+        if len(self.plugins) == 0:
+            print "no plugins installed"
+            exit(1)
+
+        for plugin in self.plugins[:-1]:
+            base_usage += "  {} {} [<arg>]{}".format(self.name, plugin["name"], "\n")
+        base_usage += "  {} {} [<arg>]{}".format(self.name, self.plugins[-1]["name"], "")
+        print usage.format(self.name, base_usage, self.name)
+
+
+def main():
+    cmd_line = BaseParser(sys.argv)
+    cmd_line.parse()
+
+if __name__ == "__main__":
+    main()
