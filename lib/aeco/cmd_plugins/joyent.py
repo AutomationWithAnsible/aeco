@@ -12,13 +12,14 @@
 
 
 """
-aeco _joyent
+aeco joyent
 
 Usage:
   aeco joyent server list [-v]
   aeco joyent server delete <servername>
   aeco joyent server create
   aeco joyent network list
+  aeco joyent update
   aeco joyent -h | --help
 
 Options:
@@ -90,7 +91,6 @@ class Joyent(AecoBase):
 
     def _list_server(self):
         try:
-            # name="a"
             self.machines = self.sdc.machines()
         except Exception as e:
             print "Unable to search for server: %s" % str(e)
@@ -100,7 +100,7 @@ class Joyent(AecoBase):
 
         # Print results
         headers = ["Name", "State", "ID", "IPs", "Type", "DataSet", "Created"]
-        question = "List _joyent Machines in {}".format(TColors.yellow(self.location))
+        question = "List joyent Machines in {}".format(TColors.yellow(self.location))
         print_table(self.results, headers=headers, question=question)
 
     def joyent_runner(self, machine_name, api, state, package=None, networks=None, image=None):
@@ -116,8 +116,8 @@ class Joyent(AecoBase):
             forks=1,
             inventory=inventory_manager,
             transport="local",
-            module_name='_joyent',
-            module_path=self._get_config("_ansible_lib"),
+            module_name='joyent',
+            module_path=self._get_config("ansible_lib"),
             module_args=module_arg
         ).run()
         for (hostname, result) in results['contacted'].items():
@@ -155,7 +155,7 @@ class Joyent(AecoBase):
             return None
 
     def _create_server(self):
-        path_to_json_file = os.path.dirname(os.path.realpath(__file__)) + "/_joyent"
+        path_to_json_file = os.path.dirname(os.path.realpath(__file__)) + "/joyent"
         machine_name = input_choice("Machine name", fmode=True)
         api = input_choice("API Server", ["us-east-1", "us-west-1", "us-sw-1", "eu-ams-1", "us-east-2", "us-east-3"],
                            fmode=False)
@@ -198,6 +198,24 @@ class Joyent(AecoBase):
         else:
             print "bye..."
 
+    def _update_db(self):
+        try:
+            self.machines = self.sdc.machines()
+        except Exception as e:
+            print "Unable to search for server: %s" % str(e)
+            exit(1)
+
+        for machine in self.machines:
+            self._machine_format(machine)
+
+        # Print results
+        server_list = {}
+        for server in self.results:
+            server_list.update({server[0]: server[3].split(",")})
+
+        with open('/tmp/server.json', 'w') as outfile:
+            json.dump(server_list, outfile)
+
     def _delete_server(self):
         machine_name = self.arguments.get("<servername>")
         api = self._get_config("api")
@@ -224,7 +242,7 @@ class Joyent(AecoBase):
             self._network_format(network)
         
         headers = ["Public", "Name", "Id","Description"]
-        question = "List of _joyent networks in {}".format(TColors.yellow(self.location))
+        question = "List of joyent networks in {}".format(TColors.yellow(self.location))
         print_table(self.results, headers=headers, question=question)
         exit(1)
 
@@ -245,3 +263,6 @@ class Joyent(AecoBase):
             if self.arguments.get("list"):
                 self._connect()
                 self._network_list()
+        elif self.arguments.get("update"):
+            self._connect()
+            self._update_db()
