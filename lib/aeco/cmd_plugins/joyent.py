@@ -18,6 +18,8 @@ Usage:
   aeco joyent server list [-v]
   aeco joyent server delete <servername>
   aeco joyent server create
+  aeco joyent server start <servername>
+  aeco joyent server stop <servername>
   aeco joyent network list
   aeco joyent update
   aeco joyent -h | --help
@@ -231,6 +233,26 @@ class Joyent(AecoBase):
         print "if you run mac os OS X Yosemite you can reset your dns cache with:"
         print "\tsudo discoveryutil mdnsflushcache"
 
+    def _stop_server(self):
+        machine_name = self.arguments.get("<servername>")
+        api = self._get_config("api")
+        print "Are you sure you want to stop '" + TColors.red(machine_name) + "' in '" + TColors.red(api) + "'?"
+        user_input = raw_input("If you are sure please type the server name again: ")
+        if user_input != machine_name:
+            print "Server names don't match. bye!!"
+            exit(1)
+        self.joyent_runner(machine_name, api, "stopped")
+
+    def _start_server(self):
+        machine_name = self.arguments.get("<servername>")
+        api = self._get_config("api")
+        print "Are you sure you want to start '" + TColors.red(machine_name) + "' in '" + TColors.red(api) + "'?"
+        user_input = raw_input("If you are sure please type the server name again: ")
+        if user_input != machine_name:
+            print "Server names don't match. bye!!"
+            exit(1)
+        self.joyent_runner(machine_name, api, "running")
+
     def _network_list(self):
         networks = []
         try:
@@ -259,6 +281,10 @@ class Joyent(AecoBase):
                 self._delete_server()
             elif self.arguments.get("create"):
                 self._create_server()
+            elif self.arguments.get("stop"):
+                self._stop_server()
+            elif self.arguments.get("start"):
+                self._start_server()
         elif self.arguments.get("network"):
             if self.arguments.get("list"):
                 self._connect()
