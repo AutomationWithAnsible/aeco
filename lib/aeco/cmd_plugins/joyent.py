@@ -44,11 +44,22 @@ class Joyent(AecoBase):
         super(Joyent, self).__init__(options=options, docs=__doc__)
         self.machines = []
         self.sdc = None
-
+        
         self.key_name = self._get_config("keyname")
         self.user_name = self._get_config("username")
         self.location = self._get_config("api")
         self.id_rsa = self._get_config("id_rsa")
+        
+        if self.user_name == False:
+            print "Joyent username is not set"
+            exit(1)
+        if self.key_name == False:
+            print "id_rsa is not set"
+            exit(1)
+        if self.id_rsa == False:
+            print "id_rsa is not set"
+            exit(1)
+        
         self.key_id = "/" + self.user_name + "/keys/" + self.key_name
 
     def _connect(self):
