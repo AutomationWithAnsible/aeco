@@ -44,12 +44,12 @@ class Joyent(AecoBase):
         super(Joyent, self).__init__(options=options, docs=__doc__)
         self.machines = []
         self.sdc = None
-        
+
         self.key_name = self._get_config("keyname")
         self.user_name = self._get_config("username")
         self.location = self._get_config("api")
         self.id_rsa = self._get_config("id_rsa")
-        
+
         if self.user_name == False:
             print "Joyent username is not set"
             exit(1)
@@ -57,9 +57,8 @@ class Joyent(AecoBase):
             print "id_rsa is not set"
             exit(1)
         if self.id_rsa == False:
-            print "id_rsa is not set"
-            exit(1)
-        
+            self.id_rsa = '~/.ssh/id_rsa'
+
         self.key_id = "/" + self.user_name + "/keys/" + self.key_name
 
     def _connect(self):
@@ -273,7 +272,7 @@ class Joyent(AecoBase):
             exit(1)
         for network in networks:
             self._network_format(network)
-        
+
         headers = ["Public", "Name", "Id","Description"]
         question = "List of joyent networks in {}".format(TColors.yellow(self.location))
         print_table(self.results, headers=headers, question=question)

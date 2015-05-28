@@ -3,6 +3,7 @@
 import sys
 import os
 import pkgutil
+import getpass
 import aeco.cmd_plugins as cmd_plugins
 
 import ConfigParser
@@ -25,7 +26,7 @@ class BaseParser():
     def config_read(self, section):
         config = ConfigParser.ConfigParser()
         #config_file = self.path_to_me + __CONF__
-        config_file = "/Users/helal/" + __CONF__
+        config_file = "/Users/" + getpass.getuser() + "/" + __CONF__
         try:
             config.read(config_file)
             return config.items(section)
