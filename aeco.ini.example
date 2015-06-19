@@ -1,18 +1,9 @@
-[control]
-jenkins_url = http://ah-control000.yetudev.com:8080
-
-[jenkins]
-jenkins_url = http://ah-jenkins000.yetudev.com:8080
-
 [joyent]
 api = eu-ams-1
-username = yetu
+username = <someUsername>
 id_rsa = ~/.ssh/id_rsa
 ansible_lib = <REPLACE_ME>/extensions/ansible_plugins/library
 
-[ansible]
-rethinkdb_host = ah-control000.yetudev.com
-rethinkdb_port = 28015
 
 [foo]
 option1 = "Do Something"
