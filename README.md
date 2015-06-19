@@ -1,4 +1,4 @@
-# Clean up and opensource
+# AECO Apphome ecosystems tools
 
 ## TODO:
 * Proper read me
@@ -9,7 +9,5 @@
 1. Clone this repo
 2. Run `sudo python setup.py install`
 3. Run `sudo pip install git+https://github.com/yetu/py-smartdc.git`
-3. Copy aeco [configuration](aeco.ini.example) to your home directory.
-4. Edit the paths to `apphome-ansible` and your public SSH key
+3. Copy aeco [configuration](aeco.ini.example) to your home directory as aeco.ini. And edit config file as needed.
 
-Then configure your `aeco.ini` config file.
